@@ -48,7 +48,7 @@
                                     @foreach ($transaksi->detail_transaksi as $detailIndex => $detail)
                                         <tr>
                                             @if ($detailIndex === 0)
-                                                <td rowspan="{{ $rowSpan }}">{{ $index + 0 }}</td>
+                                                <td rowspan="{{ $rowSpan }}">{{ $index + 1 }}</td>
                                                 <td rowspan="{{ $rowSpan }}">{{ $transaksi->kasir ? $transaksi->kasir->name : 'Kasir Tidak Diketahui' }}</td>
                                             @endif
                                             <td>{{ $detail->barang->nama_barang }}</td>
