@@ -1,9 +1,10 @@
 @extends('admin.layout.app')
+@section('main')
 
-<div class="container">
-  <div class="row justify-content-center align-items-center" style="height: 95vh;">
+<div class="container-fluid">
+  <div class="row justify-content-center align-items-center">
        <div class="col-lg-10">
-        <div class="card mx-auto" style="max-width: 100%;">
+        <div class="card">
           <div class="card-header">
                 <div class="box-header with-border">
                  <div class="d-flex align-item-center ">
@@ -73,7 +74,7 @@
           <div class="modal-body">
            <div class="form-group">
              <label class="text-black">Kode Barang</label>
-             <input type="text" class="form-control" name="kode_brg" placeholder="Kode Barang ..." required>
+             <input type="text" class="form-control" name="kode_brg" id="kode_brg" readonly>
            </div>
             <div class="form-group">
               <label class="text-black">Nama Barang</label>
@@ -132,7 +133,7 @@
            <div class="modal-body">
             <div class="form-group">
               <label class="text-black">Kode Barang</label>
-              <input type="text" class="form-control" name="kode_brg" value="{{ $d->kode_brg }}" placeholder="Kode Barang ..." required>
+              <input type="text" class="form-control" name="kode_brg" value="{{ $d->kode_brg }}" placeholder="Kode Barang ..." required readonly>
             </div>
              <div class="form-group">
                <label class="text-black">Nama Barang</label>
@@ -206,6 +207,17 @@
 @endforeach
 @endif
 
+<script src="{{ asset('assets/js/jquery.min.js') }}"></script>
+<script>
+    function generateKode() {
+      var kode = "BRG-" + Date.now(); // Menggunakan timestamp
+
+      document.getElementById("kode_brg").value = kode;
+    }
+
+    window.onload = generateKode;
+</script>
+
    <script>
       $(document).ready(function() {
          $('#myTable').DataTable();
@@ -225,3 +237,4 @@
 </script>
 @endif
 
+@endsection

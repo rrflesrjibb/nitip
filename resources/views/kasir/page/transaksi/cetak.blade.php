@@ -19,6 +19,17 @@
             text-align: center;
             margin-bottom: 20px;
         }
+        .info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .info-left {
+            text-align: left;
+        }
+        .info-right {
+            text-align: right;
+        }
         .table {
             width: 100%;
             border-collapse: collapse;
@@ -33,15 +44,49 @@
         .text-center {
             text-align: center;
         }
+
+        /* Responsif untuk mencetak */
+        @media print {
+            .container {
+                max-width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            .header {
+                margin-bottom: 10px;
+            }
+            .info {
+                margin-bottom: 5px;
+            }
+            .table th, .table td {
+                padding: 6px;
+            }
+            .footer {
+                margin-top: 10px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>Market Fless</h1>
-            <h3>Tanggal : {{ date('d F Y', strtotime($transaksi->tgl_transaksi)) }}</h3>
+            <h4>-</h4>
+            <h4></h4>
+            <h3>SMKN 1 Katapang</h3>
+            <h4>Jln.Ceuri Jalan Terusan Kopo No.KM 13.5, Katapang, Kec. Katapang</h4>
+            <h3>===================================================================================</h3>
+            <div class="info" style="display: flex; justify-content: space-between;">
+                <div class="info-left">
+                    <h4 style="margin: 0; vertical-align: middle;">Tanggal: {{ date('d F Y', strtotime($transaksi->tgl_transaksi)) }}
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;No Transaksi: {{ $transaksi->no_transaksi }}
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Kasir: {{ $kasir }}</h4>
+                </div>
+            </div>
+            <h3>===================================================================================</h3>
+
+
         </div>
-        <p>Kasir: {{ $kasir }}</p> <!-- Tampilkan nama kasir -->
         <div class="table-responsive">
             <table class="table table-bordered">
                 <thead>
@@ -84,9 +129,11 @@
                     </tr>
                 </tfoot>
             </table>
-        </div>
+    </div>
+    <br>
         <div class="footer">
-            <h1 class="text-center">Terimakasih</h1>
+            <h3>=================================================================================</h3>
+            <h1 class="text-center">*****Terimakasih*****</h1>
         </div>
     </div>
 </body>

@@ -12,6 +12,8 @@ return new class extends Migration
             $table->id();
             $table->bigInteger('id_member')->unsigned()->nullable();
             $table->foreign('id_member')->references('id')->on('tbl_member')->onDelete('cascade')->onUpdate('cascade');
+            $table->bigInteger('id_kasir')->unsigned()->nullable();
+            $table->foreign('id_kasir')->references('id')->on('kasir')->onDelete('cascade')->onUpdate('cascade');
             $table->bigInteger('id_detail_transaksi')->unsigned()->nullable();
             $table->foreign('id_detail_transaksi')->references('id')->on('tbl_detail_transaksi')->onDelete('cascade')->onUpdate('cascade');
             $table->string('bayar');

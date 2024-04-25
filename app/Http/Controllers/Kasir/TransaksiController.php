@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 use PDF;
 
 class TransaksiController extends Controller
@@ -23,10 +24,15 @@ class TransaksiController extends Controller
             'title' => 'Data Transaksi',
         ];
 
-        $transaksi = Transaksi::all();
+        // Mendapatkan ID kasir yang sedang masuk
+        $kasirId = Auth::id();
+
+        // Mengambil transaksi yang dilakukan oleh kasir yang sedang masuk
+        $transaksi = Transaksi::where('id_kasir', $kasirId)->get();
 
         return view('kasir.page.transaksi.index', $data, compact('transaksi'));
     }
+
 
     public function create()
     {
@@ -38,9 +44,8 @@ class TransaksiController extends Controller
         return view('kasir.page.transaksi.add', compact('data_member', 'data_barang','detail'));
     }
 
-    public function transaksi(request $request)
+    public function transaksi(Request $request)
     {
-        // dd($request->all());
         DB::beginTransaction();
         try {
             $data = new Transaksi;
@@ -48,79 +53,110 @@ class TransaksiController extends Controller
             $data->id_member = $request->member;
             $data->bayar = $request->uang_pembeli;
             $data->diskon = $request->diskon;
-            $data->tgl_transaksi = now();
+            $data->tgl_transaksi = Carbon::now(); // or now()
             $data->total_bayar = $request->total_bayar;
             $data->uang_kembalian = $request->kembalian;
+            $data->no_transaksi = $this->generateNomorTransaksi(); // Menambahkan nomor transaksi
+
+            // Mendapatkan ID kasir yang sedang masuk
+            $kasirId = Auth::id();
+            $data->id_kasir = $kasirId;
 
             $data->save();
-            db::commit();
 
+            // Memperbarui detail transaksi yang belum terhubung dengan transaksi
             if ($data->exists) {
                 $data_terbaru = Transaksi::latest()->first();
-
                 DetailTransaksi::whereNull('id_transaksi')->update(['id_transaksi' => $data_terbaru->id]);
             }
 
-            $transaksi = Transaksi::all();
+            // Mengurangi stok barang yang terlibat dalam transaksi
+            $detailTransaksi = DetailTransaksi::where('id_transaksi', $data->id)->get();
+            foreach ($detailTransaksi as $detail) {
+                $barang = Barang::find($detail->id_barang);
+                if ($barang) {
+                    // Kurangi stok barang sesuai dengan jumlah pembelian pada detail transaksi
+                    $barang->stok -= $detail->jumlah;
+                    $barang->save();
+                }
+            }
+
+            DB::commit();
+
+            // Mengambil transaksi yang dilakukan oleh kasir yang sedang masuk
+            $transaksi = Transaksi::where('id_kasir', $kasirId)->get();
 
             return view('kasir.page.transaksi.index', compact('transaksi'));
-
-            // $update->update();
-            // db::commit();
-
-        //  return redirect()->back();
         } catch (\Throwable $th) {
+            DB::rollback();
             throw $th;
         }
     }
 
+    // Method untuk menghasilkan nomor transaksi dengan awalan "NT-"
+    private function generateNomorTransaksi() {
+        // Format nomor transaksi: NT-TGL-BLN-THN-JAM-MENIT-DETIK
+        return 'NT-' . date('ymdHis');
+    }
+
+
 
     public function addBarang(Request $request)
+    {
+        try {
+            $data_barang = Barang::findOrFail($request->id_barang);
+            $jumlah = $request->jumlah;
+
+            // Periksa apakah stok barang cukup untuk ditambahkan ke transaksi
+            if ($data_barang->stok <= 0 || $jumlah > $data_barang->stok) {
+                return redirect()->back()->with('error', 'Stok barang habis atau tidak mencukupi.');
+            }
+
+            // Tambahkan barang ke detail transaksi tanpa mengurangi stok
+            $detail_transaksi = new DetailTransaksi;
+
+            if ($data_barang) {
+                $detail_transaksi->id_barang = $data_barang->id;
+                $detail_transaksi->harga = $data_barang->harga;
+                $detail_transaksi->jumlah = $jumlah;
+                $detail_transaksi->subtotal = $data_barang->harga * $jumlah;
+
+                $detail_transaksi->save();
+
+                return redirect()->back()->with('success', 'Barang berhasil ditambahkan ke transaksi.');
+            } else {
+                return redirect()->back()->with('error', 'Barang tidak ditemukan.');
+            }
+        } catch (\Throwable $th) {
+            // Tangani kesalahan jika terjadi
+            return redirect()->back()->with('error', 'Gagal menambahkan barang ke transaksi. Silakan coba lagi.');
+        }
+    }
+
+
+  public function hapusBarang($id)
 {
     try {
-        $data_barang = Barang::findOrFail($request->id_barang);
-        $jumlah = $request->jumlah;
-        $detail_transaksi = new DetailTransaksi;
+        // Ambil detail transaksi yang akan dihapus
+        $detailTransaksi = DetailTransaksi::findOrFail($id);
 
-        if ($data_barang) {
-            $detail_transaksi->id_barang = $data_barang->id;
-            $detail_transaksi->harga = $data_barang->harga;
-            $detail_transaksi->jumlah = $jumlah;
-            $detail_transaksi->subtotal = $data_barang->harga * $jumlah;
+        // Ambil jumlah barang yang dibatalkan
+        $jumlahDibatalkan = $detailTransaksi->jumlah;
 
-            $detail_transaksi->save();
+        // Hapus detail transaksi dari database
+        $detailTransaksi->delete();
 
-            DB::commit();
+        // Kembalikan jumlah barang yang dibatalkan ke stok
+        $barang = $detailTransaksi->barang;
+        $barang->stok += $jumlahDibatalkan;
+        $barang->save();
 
-            return redirect()->back()->with('success', 'Barang berhasil ditambahkan ke transaksi.');
-        } else {
-            return redirect()->back()->with('error', 'Barang tidak ditemukan.');
-        }
+        return redirect()->back()->with('success', 'Barang berhasil dibatalkan dan stok telah diperbarui.');
     } catch (\Throwable $th) {
-
-        DB::rollback();
-
-        return redirect()->back()->with('error', 'Gagal menambahkan barang ke transaksi. Silakan coba lagi.');
+        // Tangani kesalahan jika terjadi
+        return redirect()->back()->with('error', 'Gagal membatalkan barang. Silakan coba lagi.');
     }
 }
-
-
-
-
-    public function hapusBarang($id)
-    {
-
-        try {
-            $data_barang = DetailTransaksi::where('id',$id)->first();
-
-            $data_barang->delete();
-            db::commit();
-
-            return redirect()->back();
-        } catch (\Throwable $th) {
-            //throw $th;
-        }
-    }
 
 
     public function cetak($id)

@@ -1,9 +1,9 @@
 @extends('kasir.layout.app')
 @section('main')
-<div class="container">
-    <div class="row justify-content-center align-items-center mt-5">
+<div class="container-fluid">
+    <div class="row justify-content-center align-items-center">
          <div class="col-lg-10">
-          <div class="card mx-auto float-right mt-5" style="max-width: 100%;">
+          <div class="card">
             <div class="card-header">
              <div class="d-flex align-item-center ">
                 <h3 class="card-title">Data Transaksi</h3>
@@ -32,17 +32,17 @@
                                 <td>
                                     {{ $item->barang->nama_barang }}
                                 </td>
-                                <td>
-                                    <input type="number" name="harga" class="form-control" value="{{ $item->harga }}" readonly>
+                                <td class="text-center">
+                                    <input type="number" name="harga" class="form-control text-center" value="{{ $item->harga }}" readonly>
                                 </td>
                                 <td>
-                                    <input type="number" name="harga" class="form-control" value="{{ $item->jumlah }}" readonly>
+                                    <input type="number" name="harga" class="form-control text-center" value="{{ $item->jumlah }}" readonly>
                                 </td>
                                 <td>
-                                    <input type="number" name="subtotal" class="form-control" value="{{ $item->subtotal }}" readonly>
+                                    <input type="number" name="subtotal" class="form-control text-center" value="{{ $item->subtotal }}" readonly>
                                  </td>
                                  <td class="text-center">
-                                    <a href="{{route('transaksi.hapusBarang', $item->id)}}" class="btn btn-danger">hapus</a>
+                                    <a href="{{route('transaksi.hapusBarang', $item->id)}}" class="btn btn-danger btn-delete">hapus</a>
                                  </td>
                             </tr>
                         @endforeach
@@ -54,6 +54,7 @@
                                         <td>
                                             <select class="form-control" name="member" id="member" required>
                                                 <option value="" hidden>-- Pilih Member --</option>
+                                                <option value="">Non Member</option>
                                                 @foreach($data_member as $member)
                                                     <option value="{{ $member->id }}">{{ $member->name }}</option>
                                                 @endforeach
@@ -69,12 +70,18 @@
                                 <tr>
                                     <td colspan="5">Total Bayar</td>
                                     <td>
-                                        <input type="text" id="total_bayar" name='total_bayar' readonly value="" class="form-control">
+                                        <input type="text" id="total_bayar" name='total_bayar' readonly value="Rp." class="form-control">
                                     </td>
                                 </tr>
                             </table>
                             <hr/>
                             <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>No Transaksi</label>
+                                        <input type="text" id="no_transaksi" class="form-control" readonly required>
+                                    </div>
+                                </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Uang Pembeli</label>
@@ -83,14 +90,14 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>Kembalian</label>
-                                        <input type="text" class="form-control" name="kembalian" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-12">
-                                    <div class="form-group">
                                         <label>Tanggal Transaksi</label>
                                         <input type="text" class="form-control" value="{{ date('d F Y') }}" readonly required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Kembalian</label>
+                                        <input type="text" class="form-control" name="kembalian" required>
                                     </div>
                                 </div>
 
@@ -150,6 +157,7 @@
      </div>
  </div>
 
+ <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
  <script src="{{ asset('assets/js/jquery.min.js') }}"></script>
    <script>
       $(document).ready(function() {
@@ -191,12 +199,17 @@
        text: "{{ $message }}",});
 </script>
 @endif
-@if($message = Session::get('failed'))
-<script>Swal.fire({
-       icon: "error",
-       text: "{{ $message }}",});
-</script>
+@if(session('error'))
+    <script>
+        Swal.fire({
+            title: 'Error!',
+            text: '{{ session('error') }}',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+    </script>
 @endif
+
 
 <script>
     $(document).on('change', '#id_barang', function() {
@@ -208,6 +221,33 @@
     });
 </script>
 
+<script>
+    // Fungsi untuk menghasilkan nomor transaksi otomatis
+    function generateNomorTransaksi() {
+    // Mendapatkan tanggal saat ini
+    var today = new Date();
+    var year = today.getFullYear();
+    var month = today.getMonth() + 1;
+    var day = today.getDate();
+    var hour = today.getHours();
+    var minute = today.getMinutes();
+    var second = today.getSeconds();
+
+    // Format tanggal menjadi string YYMMDDHHmmss
+    var dateStr = year.toString().slice(-2) + ('0' + month).slice(-2) + ('0' + day).slice(-2) +
+        ('0' + hour).slice(-2) + ('0' + minute).slice(-2) + ('0' + second).slice(-2);
+
+    // Nomor transaksi akan terdiri dari "NT-" dan tanggal
+    var nomorTransaksi = "NT-" + dateStr;
+
+    // Masukkan nomor transaksi ke dalam input tersembunyi
+    document.getElementById("no_transaksi").value = nomorTransaksi;
+}
+
+// Panggil fungsi generateNomorTransaksi saat halaman dimuat
+window.onload = generateNomorTransaksi;
+
+</script>
 
 <script>
     function hitungDiskon() {
@@ -215,17 +255,30 @@
         var diskonInput = document.getElementsByName('diskon')[0];
         var totalBayarInput = document.getElementsByName('total_bayar')[0];
         var totalBayar = parseFloat(totalBayarInput.value);
-        var selectedMemberValue = parseFloat(memberSelect.value);
 
-        if (selectedMemberValue && totalBayar >= 50000) {
-            memberSelect.disabled = true;
+        // Mengubah diskon menjadi persentase
+        var diskonPercentage = 5; // Persentase diskon
 
-            var diskon = 0.05 * totalBayar;
-            totalBayar -= diskon;
-            diskonInput.value = parseInt(diskon);
+        // Periksa apakah total belanja mencapai atau melebihi 50000
+        if (totalBayar >= 50000) {
+            // Jika total belanja mencapai atau melebihi 50000, periksa pemilihan member
+            var selectedMemberValue = parseFloat(memberSelect.value);
+            if (selectedMemberValue) {
+                // Jika member dipilih, hitung diskon berdasarkan persentase
+                var diskon = diskonPercentage;
+                totalBayar -= totalBayar * (diskon / 100); // Menghitung diskon berdasarkan persentase
+                diskonInput.value = diskon + "%"; // Menampilkan persentase diskon
+            } else {
+                // Jika member tidak dipilih, kosongkan input diskon
+                diskonInput.value = "";
+            }
+            // Aktifkan pilihan member
+            memberSelect.disabled = false;
         } else {
-
+            // Jika total belanja kurang dari 50000, diskon diatur ke nol dan input diskon dikosongkan
             diskonInput.value = "";
+            // Nonaktifkan pilihan member
+            memberSelect.disabled = true;
         }
 
         totalBayarInput.value = parseInt(totalBayar);
@@ -236,8 +289,15 @@
 
         var memberSelect = document.getElementById('member');
         memberSelect.addEventListener('change', hitungDiskon);
+
+        // Panggil hitungDiskon saat halaman dimuat
+        window.onload = function() {
+            hitungDiskon();
+        };
     });
 </script>
+
+
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -250,15 +310,21 @@
             var totalBayar = parseFloat(totalBayarInput.value);
 
             var kembalian = uangPembeli - totalBayar;
-            kembalianInput.value = kembalian.toFixed(0);
+
+            // Menampilkan pesan jika uang yang dibayarkan kurang dari total bayar
+            if (kembalian < 0) {
+                kembalianInput.value = "";
+                // Tambahkan pesan ke dalam input kembalian
+                kembalianInput.placeholder = "Uang kurang!";
+            } else {
+                kembalianInput.value = kembalian.toFixed(0);
+            }
         }
 
         var uangPembeliInput = document.getElementsByName('uang_pembeli')[0];
         uangPembeliInput.addEventListener('input', hitungKembalian);
     });
 </script>
-
-
 
 <script>
     function hitungTotalBayar() {
@@ -273,6 +339,9 @@
 
         totalBayar = Math.round(totalBayar);
         totalBayarInput.value = totalBayar;
+
+        // Panggil fungsi generateNomorTransaksi untuk memperbarui nomor transaksi setiap kali total bayar dihitung ulang
+        generateNomorTransaksi();
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -284,4 +353,29 @@
         }
     });
 </script>
+
+<script>
+    $(document).on('click', '.btn-delete', function(e) {
+        e.preventDefault();
+        var url = $(this).attr('href');
+
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: "Data transaksi akan dihapus secara permanen!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, hapus data!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url;
+            }
+        });
+    });
+</script>
+
+
+
 @endsection

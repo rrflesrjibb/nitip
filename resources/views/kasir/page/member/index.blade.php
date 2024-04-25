@@ -1,10 +1,10 @@
 @extends('kasir.layout.app')
 @section('main')
 
-<div class="container">
-  <div class="row justify-content-center align-items-center mt-5">
+<div class="container-fluid">
+  <div class="row justify-content-center align-items-center">
        <div class="col-lg-10">
-        <div class="card mx-auto float-right mt-5" style="max-width: 100%;">
+        <div class="card">
           <div class="card-header">
               <div class="box-header with-border">
                <div class="d-flex align-item-center">

@@ -32,10 +32,10 @@
         </div>
     </div>
   </nav>
-<div class="container">
-    <div class="row justify-content-center align-items-center" style="height: 95vh;">
+<div class="container-fluid">
+    <div class="row justify-content-center align-items-center">
          <div class="col-lg-10">
-            <div class="card mx-auto mt-5" style="max-width: 100%;">
+            <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">Detail Transaksi</h3>
                 </div>

@@ -6,12 +6,13 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\KasirController;
 use App\Http\Controllers\Admin\KategoriController;
 use App\Http\Controllers\Admin\BarangController;
-use App\Http\Controllers\Admin\DiskonController;
 use App\Http\Controllers\Admin\MemberrController;
+use App\Http\Controllers\Admin\LaporannController;
 use App\Http\Controllers\Kasir\KasirrController;
 use App\Http\Controllers\Kasir\BaranggController;
 use App\Http\Controllers\Kasir\MemberController;
 use App\Http\Controllers\Kasir\TransaksiController;
+use App\Http\Controllers\Kasir\LaporanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,8 +56,9 @@ Route::middleware(['auth:admin'])->group(function () {
 
     Route::get('/admin/datamember', [MemberrController::class, 'index'])->name('datamember');
 
-    Route::get('/admin/setdiskon', [DiskonController::class, 'index'])->name('setdiskon');
-    Route::post('/setdiskon/update/{id}', [DiskonController::class, 'update'])->name('datamember.update');
+    Route::get('admin/laporan', [LaporannController::class, 'index'])->name('laporanpenjualan.index');
+    Route::get('/print-pdf', [LaporannController::class, 'printPDF'])->name('print.pdf');
+
 });
 
 
@@ -80,6 +82,7 @@ Route::middleware(['auth:kasir'])->group(function () {
     Route::post('/transaksi/addtransaksi', [TransaksiController::class, 'transaksi'])->name('transaksi.addtransaksi');
     Route::get('/transaksi/{id}/cetak', [TransaksiController::class, 'cetak'])->name('transaksi.cetak');
     Route::get('transaksi/{id}/detail', [TransaksiController::class, 'detail'])->name('transaksi.detail');
+    Route::get('/laporan-penjualan', [LaporanController::class, 'index'])->name('laporan.index');
 
 
 });

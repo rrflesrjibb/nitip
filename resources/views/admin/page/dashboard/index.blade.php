@@ -1,10 +1,11 @@
 @extends('admin.layout.app')
+@section('main')
 
   <section>
     <div class="container">
-        <div class="row justify-content-center align-items-center" style="height: 60vh;">
-            <div class="col-md-3">
-                <h5><span class="fw-light mt-4">Selamat Datang</span>,
+        <div class="row justify-content-center align-items-center">
+            <div class="col-md-2">
+                <h5><span class="fw-light">Selamat Datang</span>,
                     <b>{{ Auth::guard('admin')->user()->name }}</b>
                 </h5>
             </div>
@@ -43,4 +44,5 @@
         </div>
     </div>
   </section>
+  @endsection
 

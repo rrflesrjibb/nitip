@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{{ asset('assets/fontawesome/css/all.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/DataTables/datatables.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/DataTables/datatables.min.css')}}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10">
 
     <link rel="shortcut icon" href="{{ asset('assets/image/logo.png') }}" />
     @stack('style')

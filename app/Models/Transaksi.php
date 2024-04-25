@@ -1,12 +1,12 @@
 <?php
 
-// Transaksi.php
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
 class Transaksi extends Model
 {
+    protected $guarded = [];
     protected $table = 'tbl_transaksi';
 
     // Relasi dengan DetailTransaksi
@@ -19,6 +19,12 @@ class Transaksi extends Model
         return $this->belongsTo(Member::class, 'id_member');
 
     }
+    public function kasir()
+    {
+        return $this->belongsTo(Kasir::class, 'id_kasir');
+    }
+
+
 
 
 }

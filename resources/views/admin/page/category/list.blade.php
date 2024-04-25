@@ -1,9 +1,10 @@
 @extends('admin.layout.app')
+@section('main')
 
-<div class="container">
-    <div class="row justify-content-center align-items-center" style="height: 95vh;">
+<div class="container-fluid">
+    <div class="row justify-content-center align-items-center">
          <div class="col-lg-10">
-          <div class="card ml-auto">
+          <div class="card">
               <div class="card-header">
                   <div class="box-header with-border">
                       <div class="d-flex align-item-center ">
@@ -148,3 +149,4 @@
 </script>
 @endif
 
+@endsection

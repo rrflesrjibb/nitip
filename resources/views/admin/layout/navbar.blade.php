@@ -1,5 +1,8 @@
 <nav class="navbar navbar-expand fixed-top flex-row navbar-light bg-white">
   <div class="container-fluid">
+    <div class="text-center">
+        <img src="{{asset('assets/image/logo.png')}}"  alt="Logo" width="100">
+      </div>
       <a class="navbar-brand" href="#">Market Fless</a>
       <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ml-auto">
@@ -12,6 +15,7 @@
                   </div>
               </li>
           </ul>
+      </div>
       </div>
   </div>
 </nav>
